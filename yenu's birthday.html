@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Happy Birthday My Love ❤️</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            roseGold: '#B76E79',
+            deepCrimson: '#4A0E17',
+            blushPink: '#FFD1DC',
+            softRose: '#FFF0F5',
+            accentGold: '#F3E5AB'
+          },
+          fontFamily: {
+            cursive: ['Great Vibes', 'cursive'],
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #B76E79;
+      border-radius: 10px;
+    }
+
+    /* Glassmorphism utility */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    }
+
+    /* Floating hearts background canvas */
+    #bgCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Flip Card Effect */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 1rem;
+    }
+    .flip-card-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Candle Flame Animation */
+    .flame {
+      background: radial-gradient(ellipse at bottom, #FFF 0%, #FFD700 25%, #FF4500 80%, transparent 100%);
+      box-shadow: 0 0 12px #FFD700, 0 0 24px #FF4500;
+      animation: flicker 0.15s infinite alternate ease-in-out;
+      transform-origin: center bottom;
+    }
+    @keyframes flicker {
+      0% { transform: scale(1) rotate(-2deg); opacity: 0.95; }
+      100% { transform: scale(1.1) rotate(2deg); opacity: 1; }
+    }
+    .flame.extinguished {
+      display: none;
+    }
+    .smoke {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .flame.extinguished + .smoke {
+      animation: riseSmoke 2s ease-out forwards;
+    }
+    @keyframes riseSmoke {
+      0% { opacity: 0.8; transform: translateY(0) scale(0.5); }
+      50% { opacity: 0.4; }
+      100% { opacity: 0; transform: translateY(-30px) scale(1.5); }
+    }
+
+    /* Pulsing glowing text */
+    .glow-text {
+      text-shadow: 0 0 12px rgba(255, 182, 193, 0.6), 0 0 24px rgba(183, 110, 121, 0.4);
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen overflow-x-hidden selection:bg-roseGold selection:text-white relative">
+
+  <!-- Background Animated Hearts Canvas -->
+  <canvas id="bgCanvas"></canvas>
+
+  <!-- Sound Toggle Control (Floating) -->
+  <div class="fixed top-4 right-4 z-50">
+    <button id="musicToggleBtn" onclick="toggleAudio()" class="glass-card px-4 py-2.5 rounded-full flex items-center space-x-2 text-xs md:text-sm font-medium hover:bg-white/20 transition-all duration-300 shadow-lg border border-white/20">
+      <i id="musicIcon" class="fa-solid fa-music text-pink-400"></i>
+      <span id="musicText">Play Music</span>
+    </button>
+  </div>
+
+  <!-- ENTRANCE / WAX-SEALED GIFT ENVELOPE SCREEN -->
+  <div id="entranceScreen" class="fixed inset-0 z-40 flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-deepCrimson/90 to-slate-950 transition-opacity duration-1000">
+    <div class="text-center max-w-md mx-auto space-y-6">
+      <div class="inline-block p-3 rounded-full bg-roseGold/10 border border-roseGold/30 animate-pulse">
+        <i class="fa-solid fa-heart text-roseGold text-2xl"></i>
+      </div>
+      
+      <h1 class="text-4xl md:text-6xl font-cursive font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-roseGold to-amber-100 glow-text">
+        A Special Surprise For You
+      </h1>
+      
+      <p class="text-slate-300 text-sm md:text-base font-light px-4">
+        I made a little birthday page just for you. Tap the heart seal to open your surprise!
+      </p>
+
+      <!-- Wax-Sealed Interactive Envelope -->
+      <div class="pt-6 flex justify-center">
+        <div id="envelopeContainer" onclick="openBirthdaySurprise()" class="cursor-pointer group relative w-72 h-48 bg-gradient-to-br from-rose-900 to-rose-950 rounded-2xl shadow-2xl border border-rose-500/30 flex items-center justify-center transition-transform hover:scale-105 active:scale-95">
+          <!-- Envelope Wax Seal -->
+          <div id="envelopeSeal" class="w-16 h-16 rounded-full bg-gradient-to-tr from-roseGold to-amber-300 flex items-center justify-center shadow-lg transform group-hover:scale-110 transition-transform duration-300 z-10 border-2 border-white/40">
+            <i class="fa-solid fa-heart text-2xl text-deepCrimson animate-bounce"></i>
+          </div>
+          <!-- Click Prompt Badge -->
+          <div class="absolute -bottom-10 text-xs tracking-widest uppercase font-semibold text-pink-300 flex items-center gap-2">
+            <span>Tap To Open</span>
+            <i class="fa-solid fa-sparkles"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main id="mainContent" class="relative z-10 hidden max-w-4xl mx-auto px-4 py-8 md:py-16 space-y-16 md:space-y-24">
+
+    <!-- HERO / HEADER SECTION -->
+    <section class="text-center space-y-6 pt-6">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-xs md:text-sm text-pink-300 border border-pink-500/30">
+        <i class="fa-solid fa-sparkles text-amber-300"></i>
+        <span>October 28 • Celebrating You</span>
+        <i class="fa-solid fa-sparkles text-amber-300"></i>
+      </div>
+
+      <h1 class="text-5xl sm:text-7xl md:text-8xl font-cursive font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-roseGold to-pink-100 glow-text leading-tight">
+        Happy Birthday, My Love!
+      </h1>
+
+      <p class="text-slate-300 text-sm md:text-lg max-w-xl mx-auto font-light leading-relaxed">
+        Today is all about celebrating the wonderful person you are, your beautiful smile, and all the happiness you bring into my life every single day.
+      </p>
+
+      <!-- Countdown timer targeting Oct 28 -->
+      <div id="countdownBox" class="glass-card p-4 rounded-2xl max-w-lg mx-auto grid grid-cols-4 gap-2 text-center border border-white/10">
+        <div>
+          <span id="cDays" class="block text-2xl md:text-3xl font-bold text-roseGold">00</span>
+          <span class="text-[10px] uppercase tracking-wider text-slate-400">Days</span>
+        </div>
+        <div>
+          <span id="cHours" class="block text-2xl md:text-3xl font-bold text-roseGold">00</span>
+          <span class="text-[10px] uppercase tracking-wider text-slate-400">Hours</span>
+        </div>
+        <div>
+          <span id="cMins" class="block text-2xl md:text-3xl font-bold text-roseGold">00</span>
+          <span class="text-[10px] uppercase tracking-wider text-slate-400">Mins</span>
+        </div>
+        <div>
+          <span id="cSecs" class="block text-2xl md:text-3xl font-bold text-roseGold">00</span>
+          <span class="text-[10px] uppercase tracking-wider text-slate-400">Secs</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SIMPLE & NATURAL LOVE LETTER SECTION -->
+    <section class="glass-card rounded-3xl p-6 md:p-10 relative overflow-hidden">
+      <div class="absolute -top-12 -right-12 w-40 h-40 bg-roseGold/20 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div class="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-full bg-roseGold/20 flex items-center justify-center text-roseGold">
+            <i class="fa-solid fa-envelope-open-text text-lg"></i>
+          </div>
+          <h2 class="font-serif text-xl md:text-2xl font-semibold text-pink-100">A Letter From My Heart</h2>
+        </div>
+        <button onclick="editLetter()" title="Customize Letter" class="text-xs text-slate-400 hover:text-pink-300 transition-colors flex items-center gap-1">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>Edit</span>
+        </button>
+      </div>
+
+      <div class="font-sans text-slate-200 text-base md:text-lg leading-relaxed space-y-4 min-h-[160px] font-light">
+        <p id="typewriterText" class="inline"></p>
+        <span id="cursor" class="inline-block w-2 h-5 bg-pink-400 ml-1 animate-pulse"></span>
+      </div>
+
+      <div class="mt-8 pt-4 border-t border-white/10 flex justify-end">
+        <p class="font-cursive text-3xl text-roseGold">I love you so much! ❤️</p>
+      </div>
+    </section>
+
+    <!-- INTERACTIVE BIRTHDAY CAKE WITH BLOWABLE CANDLES -->
+    <section class="glass-card rounded-3xl p-6 md:p-10 text-center relative overflow-hidden">
+      <h2 class="font-serif text-2xl md:text-3xl font-semibold text-pink-100 mb-2">Make a Birthday Wish</h2>
+      <p class="text-xs md:text-sm text-slate-300 mb-8">Tap on the candle flames or button below to blow them out!</p>
+
+      <div class="relative py-8 flex flex-col items-center justify-center">
+        <!-- Cake Graphic -->
+        <div class="relative w-48 md:w-56 h-40 flex flex-col items-center justify-end">
+          
+          <!-- Candle 1 -->
+          <div class="absolute top-0 left-12 flex flex-col items-center cursor-pointer" onclick="blowCandle(1)">
+            <div id="flame1" class="flame w-3.5 h-6 rounded-full mb-1"></div>
+            <div class="smoke w-2 h-2 bg-slate-400 rounded-full"></div>
+            <div class="w-2.5 h-10 bg-gradient-to-b from-amber-200 to-pink-300 rounded-t-sm shadow-sm"></div>
+          </div>
+
+          <!-- Candle 2 (Center) -->
+          <div class="absolute -top-4 flex flex-col items-center cursor-pointer z-10" onclick="blowCandle(2)">
+            <div id="flame2" class="flame w-4 h-7 rounded-full mb-1"></div>
+            <div class="smoke w-2 h-2 bg-slate-400 rounded-full"></div>
+            <div class="w-3 h-12 bg-gradient-to-b from-rose-200 to-purple-300 rounded-t-sm shadow-sm"></div>
+          </div>
+
+          <!-- Candle 3 -->
+          <div class="absolute top-0 right-12 flex flex-col items-center cursor-pointer" onclick="blowCandle(3)">
+            <div id="flame3" class="flame w-3.5 h-6 rounded-full mb-1"></div>
+            <div class="smoke w-2 h-2 bg-slate-400 rounded-full"></div>
+            <div class="w-2.5 h-10 bg-gradient-to-b from-amber-200 to-pink-300 rounded-t-sm shadow-sm"></div>
+          </div>
+
+          <!-- Cake Layers -->
+          <!-- Top Tier -->
+          <div class="w-32 h-12 bg-gradient-to-r from-pink-300 via-rose-200 to-pink-300 rounded-t-2xl shadow-md relative border-b-2 border-rose-400/30 flex items-center justify-center">
+            <div class="absolute -bottom-1 w-full flex justify-around">
+              <span class="w-3 h-3 bg-white rounded-full"></span>
+              <span class="w-3 h-3 bg-white rounded-full"></span>
+              <span class="w-3 h-3 bg-white rounded-full"></span>
+              <span class="w-3 h-3 bg-white rounded-full"></span>
+            </div>
+          </div>
+          <!-- Bottom Tier -->
+          <div class="w-48 md:w-56 h-16 bg-gradient-to-r from-rose-900 via-rose-800 to-rose-900 rounded-t-xl shadow-lg relative flex items-center justify-center border-t border-rose-500/20">
+            <div class="w-full text-center text-xs font-serif text-pink-200 tracking-widest uppercase">Happy Birthday</div>
+          </div>
+          <!-- Plate Base -->
+          <div class="w-56 md:w-64 h-3 bg-slate-300 rounded-full shadow-2xl"></div>
+        </div>
+
+        <button onclick="blowAllCandles()" class="mt-6 px-5 py-2.5 rounded-full bg-roseGold/20 hover:bg-roseGold/40 border border-roseGold/40 text-xs md:text-sm font-medium transition-colors flex items-center gap-2">
+          <i class="fa-solid fa-wind text-amber-300"></i>
+          <span>Blow Out Candles</span>
+        </button>
+      </div>
+
+      <!-- Secret Wish Reveal Banner -->
+      <div id="wishRevealed" class="hidden mt-6 p-4 rounded-xl bg-gradient-to-r from-roseGold/20 via-pink-500/20 to-roseGold/20 border border-pink-400/30 animate-fade-in">
+        <i class="fa-solid fa-sparkles text-amber-300 text-xl mb-1"></i>
+        <p class="font-serif text-lg text-pink-100 font-medium">May all your sweetest wishes and dreams come true! You deserve all the happiness in the world. ✨❤️</p>
+      </div>
+    </section>
+
+    <!-- REASONS WHY I LOVE YOU (6 FLIP CARDS) -->
+    <section class="space-y-6">
+      <div class="text-center space-y-2">
+        <h2 class="font-serif text-2xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 to-roseGold">
+          Reasons Why I Love You
+        </h2>
+        <p class="text-xs md:text-sm text-slate-400">Tap each card to reveal a reason</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+        
+        <!-- Card 1 -->
+        <div class="flip-card h-40 cursor-pointer" onclick="toggleFlip(this)">
+          <div class="flip-card-inner rounded-2xl">
+            <div class="flip-card-front glass-card p-4 flex flex-col items-center justify-center space-y-2 border border-pink-500/20">
+              <i class="fa-solid fa-heart text-2xl text-roseGold"></i>
+              <span class="font-serif text-sm font-medium text-pink-100">Reason #1</span>
+              <span class="text-[10px] text-slate-400">Tap to reveal</span>
+            </div>
+            <div class="flip-card-back bg-gradient-to-br from-rose-900 to-deepCrimson p-4 flex items-center justify-center rounded-2xl border border-rose-400/40">
+              <p class="text-xs md:text-sm font-medium text-pink-100 leading-snug">Your gentle heart and the way you care so deeply for everyone.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="flip-card h-40 cursor-pointer" onclick="toggleFlip(this)">
+          <div class="flip-card-inner rounded-2xl">
+            <div class="flip-card-front glass-card p-4 flex flex-col items-center justify-center space-y-2 border border-pink-500/20">
+              <i class="fa-solid fa-face-smile text-2xl text-roseGold"></i>
+              <span class="font-serif text-sm font-medium text-pink-100">Reason #2</span>
+              <span class="text-[10px] text-slate-400">Tap to reveal</span>
+            </div>
+            <div class="flip-card-back bg-gradient-to-br from-rose-900 to-deepCrimson p-4 flex items-center justify-center rounded-2xl border border-rose-400/40">
+              <p class="text-xs md:text-sm font-medium text-pink-100 leading-snug">Your wonderful smile that instantly makes my whole day brighter.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="flip-card h-40 cursor-pointer" onclick="toggleFlip(this)">
+          <div class="flip-card-inner rounded-2xl">
+            <div class="flip-card-front glass-card p-4 flex flex-col items-center justify-center space-y-2 border border-pink-500/20">
+              <i class="fa-solid fa-laugh-beam text-2xl text-roseGold"></i>
+              <span class="font-serif text-sm font-medium text-pink-100">Reason #3</span>
+              <span class="text-[10px] text-slate-400">Tap to reveal</span>
+            </div>
+            <div class="flip-card-back bg-gradient-to-br from-rose-900 to-deepCrimson p-4 flex items-center justify-center rounded-2xl border border-rose-400/40">
+              <p class="text-xs md:text-sm font-medium text-pink-100 leading-snug">The way you make me laugh and smile even without trying.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="flip-card h-40 cursor-pointer" onclick="toggleFlip(this)">
+          <div class="flip-card-inner rounded-2xl">
+            <div class="flip-card-front glass-card p-4 flex flex-col items-center justify-center space-y-2 border border-pink-500/20">
+              <i class="fa-solid fa-house-chimney-heart text-2xl text-roseGold"></i>
+              <span class="font-serif text-sm font-medium text-pink-100">Reason #4</span>
+              <span class="text-[10px] text-slate-400">Tap to reveal</span>
+            </div>
+            <div class="flip-card-back bg-gradient-to-br from-rose-900 to-deepCrimson p-4 flex items-center justify-center rounded-2xl border border-rose-400/40">
+              <p class="text-xs md:text-sm font-medium text-pink-100 leading-snug">Being my safe place where I can completely be myself.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="flip-card h-40 cursor-pointer" onclick="toggleFlip(this)">
+          <div class="flip-card-inner rounded-2xl">
+            <div class="flip-card-front glass-card p-4 flex flex-col items-center justify-center space-y-2 border border-pink-500/20">
+              <i class="fa-solid fa-mug-hot text-2xl text-roseGold"></i>
+              <span class="font-serif text-sm font-medium text-pink-100">Reason #5</span>
+              <span class="text-[10px] text-slate-400">Tap to reveal</span>
+            </div>
+            <div class="flip-card-back bg-gradient-to-br from-rose-900 to-deepCrimson p-4 flex items-center justify-center rounded-2xl border border-rose-400/40">
+              <p class="text-xs md:text-sm font-medium text-pink-100 leading-snug">All the little everyday moments and sweet conversations we share.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="flip-card h-40 cursor-pointer" onclick="toggleFlip(this)">
+          <div class="flip-card-inner rounded-2xl">
+            <div class="flip-card-front glass-card p-4 flex flex-col items-center justify-center space-y-2 border border-pink-500/20">
+              <i class="fa-solid fa-hand-holding-hand text-2xl text-roseGold"></i>
+              <span class="font-serif text-sm font-medium text-pink-100">Reason #6</span>
+              <span class="text-[10px] text-slate-400">Tap to reveal</span>
+            </div>
+            <div class="flip-card-back bg-gradient-to-br from-rose-900 to-deepCrimson p-4 flex items-center justify-center rounded-2xl border border-rose-400/40">
+              <p class="text-xs md:text-sm font-medium text-pink-100 leading-snug">Always being there for me with your love and support.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- POLAROID-STYLE PHOTO GALLERY -->
+    <section class="space-y-6">
+      <div class="text-center space-y-2">
+        <h2 class="font-serif text-2xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 to-roseGold">
+          Our Special Moments
+        </h2>
+        <p class="text-xs md:text-sm text-slate-400">A few of my favourite memories with you</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        
+        <!-- Photo Card 1 -->
+        <div class="glass-card rounded-2xl p-3 group hover:border-roseGold/50 transition-all duration-300 flex flex-col">
+          <div class="relative aspect-square rounded-xl overflow-hidden bg-slate-900/60 mb-3 group-hover:scale-[1.02] transition-transform">
+            <img id="img1" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&w=600&q=80" alt="Memory 1" class="w-full h-full object-cover">
+            <label class="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white text-xs px-2.5 py-1 rounded-full cursor-pointer backdrop-blur-md transition-colors border border-white/20">
+              <i class="fa-solid fa-camera mr-1"></i> Change
+              <input type="file" accept="image/*" class="hidden" onchange="uploadImage(event, 'img1')">
+            </label>
+          </div>
+          <div class="px-2 py-1">
+            <h3 class="font-serif font-semibold text-pink-200 text-base">Unforgettable Smiles</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Every moment spent with you is a memory I treasure forever.</p>
+          </div>
+        </div>
+
+        <!-- Photo Card 2 -->
+        <div class="glass-card rounded-2xl p-3 group hover:border-roseGold/50 transition-all duration-300 flex flex-col">
+          <div class="relative aspect-square rounded-xl overflow-hidden bg-slate-900/60 mb-3 group-hover:scale-[1.02] transition-transform">
+            <img id="img2" src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&w=600&q=80" alt="Memory 2" class="w-full h-full object-cover">
+            <label class="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white text-xs px-2.5 py-1 rounded-full cursor-pointer backdrop-blur-md transition-colors border border-white/20">
+              <i class="fa-solid fa-camera mr-1"></i> Change
+              <input type="file" accept="image/*" class="hidden" onchange="uploadImage(event, 'img2')">
+            </label>
+          </div>
+          <div class="px-2 py-1">
+            <h3 class="font-serif font-semibold text-pink-200 text-base">Sweet Memories</h3>
+            <p class="text-xs text-slate-400 mt-0.5">With you by my side, even simple days turn into pure magic.</p>
+          </div>
+        </div>
+
+        <!-- Photo Card 3 -->
+        <div class="glass-card rounded-2xl p-3 group hover:border-roseGold/50 transition-all duration-300 flex flex-col sm:col-span-2 md:col-span-1">
+          <div class="relative aspect-square rounded-xl overflow-hidden bg-slate-900/60 mb-3 group-hover:scale-[1.02] transition-transform">
+            <img id="img3" src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=600&q=80" alt="Memory 3" class="w-full h-full object-cover">
+            <label class="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white text-xs px-2.5 py-1 rounded-full cursor-pointer backdrop-blur-md transition-colors border border-white/20">
+              <i class="fa-solid fa-camera mr-1"></i> Change
+              <input type="file" accept="image/*" class="hidden" onchange="uploadImage(event, 'img3')">
+            </label>
+          </div>
+          <div class="px-2 py-1">
+            <h3 class="font-serif font-semibold text-pink-200 text-base">Always & Forever</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Here is to making thousands more beautiful memories together.</p>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- CELEBRATION ACTION BUTTON -->
+    <section class="text-center space-y-4 pt-4">
+      <button onclick="triggerCelebration()" class="group relative inline-flex items-center justify-center px-8 py-4 font-semibold text-white transition-all duration-300 bg-gradient-to-r from-roseGold via-pink-600 to-roseGold rounded-full shadow-lg shadow-rose-900/40 hover:shadow-rose-500/50 hover:scale-105 active:scale-95 border border-white/20">
+        <i class="fa-solid fa-champagne-glasses mr-3 text-amber-200 text-lg group-hover:rotate-12 transition-transform"></i>
+        <span class="text-base md:text-lg">Celebrate With Confetti!</span>
+      </button>
+      <p class="text-xs text-slate-400">Tap to launch birthday confetti fireworks!</p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="text-center pt-10 pb-6 border-t border-white/10 text-xs text-slate-400 space-y-2">
+      <p>Made with ❤️ for the most special girl in the world.</p>
+      <p class="text-[10px] text-slate-500">Happiest Birthday Ever!</p>
+    </footer>
+
+  </main>
+
+  <!-- EDITABLE LETTER MODAL -->
+  <div id="letterModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="glass-card w-full max-w-lg rounded-2xl p-6 space-y-4 border border-white/20">
+      <h3 class="font-serif text-xl font-semibold text-pink-100">Customize Your Message</h3>
+      <p class="text-xs text-slate-300">Type your personalized letter below and hit save:</p>
+      <textarea id="modalLetterInput" rows="6" class="w-full bg-slate-900/80 border border-white/20 rounded-xl p-3 text-slate-200 text-sm focus:outline-none focus:border-roseGold"></textarea>
+      <div class="flex justify-end gap-3">
+        <button onclick="closeModal()" class="px-4 py-2 text-xs rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700">Cancel</button>
+        <button onclick="saveLetter()" class="px-4 py-2 text-xs rounded-xl bg-roseGold text-white hover:bg-rose-600 font-semibold">Save Letter</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    /* ========================================================
+       1. FLOATING HEARTS CANVAS ANIMATION
+       ======================================================== */
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class HeartParticle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + Math.random() * 100;
+        this.size = Math.random() * 14 + 8;
+        this.speedY = Math.random() * 1.5 + 0.6;
+        this.opacity = Math.random() * 0.5 + 0.3;
+        this.color = `hsla(${Math.random() * 30 + 330}, 80%, 75%, ${this.opacity})`;
+        this.rotation = Math.random() * Math.PI;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.02;
+      }
+      update() {
+        this.y -= this.speedY;
+        this.x += Math.sin(this.y * 0.01) * 0.5;
+        this.rotation += this.rotationSpeed;
+        if (this.y < -30) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.rotation);
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        const topCurveHeight = this.size * 0.3;
+        ctx.moveTo(0, topCurveHeight);
+        ctx.bezierCurveTo(0, 0, -this.size / 2, 0, -this.size / 2, topCurveHeight);
+        ctx.bezierCurveTo(-this.size / 2, (this.size + topCurveHeight) / 2, 0, this.size, 0, this.size);
+        ctx.bezierCurveTo(0, this.size, this.size / 2, (this.size + topCurveHeight) / 2, this.size / 2, topCurveHeight);
+        ctx.bezierCurveTo(this.size / 2, 0, 0, 0, 0, topCurveHeight);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    for (let i = 0; i < 35; i++) {
+      particles.push(new HeartParticle());
+    }
+
+    function animateHearts() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateHearts);
+    }
+    animateHearts();
+
+    /* ========================================================
+       2. TYPEWRITER LOVE LETTER EFFECT & EDITING
+       ======================================================== */
+    let defaultMessage = "Happy Birthday to my favourite person in the whole world! 🌸 I just wanted to take a moment to tell you how much you mean to me. Having you in my life makes every single day so much brighter and happier. Your sweet smile, your kind heart, and the little moments we share together mean everything to me. I hope your special day is filled with as much happiness, sweetness, and love as you bring into my life every day. Thank you for being you!";
+    let currentText = defaultMessage;
+    let typeIndex = 0;
+
+    function startTypewriter() {
+      const el = document.getElementById('typewriterText');
+      el.innerHTML = "";
+      typeIndex = 0;
+
+      function type() {
+        if (typeIndex < currentText.length) {
+          el.innerHTML += currentText.charAt(typeIndex);
+          typeIndex++;
+          setTimeout(type, 35);
+        }
+      }
+      type();
+    }
+
+    function editLetter() {
+      document.getElementById('modalLetterInput').value = currentText;
+      document.getElementById('letterModal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('letterModal').classList.add('hidden');
+    }
+
+    function saveLetter() {
+      const newMsg = document.getElementById('modalLetterInput').value.trim();
+      if (newMsg) {
+        currentText = newMsg;
+        closeModal();
+        startTypewriter();
+      }
+    }
+
+    /* ========================================================
+       3. INTERACTIVE FLIP CARDS & CANDLES
+       ======================================================== */
+    function toggleFlip(card) {
+      card.classList.toggle('flipped');
+    }
+
+    let extinguishedCount = 0;
+    function blowCandle(index) {
+      const flame = document.getElementById(`flame${index}`);
+      if (flame && !flame.classList.contains('extinguished')) {
+        flame.classList.add('extinguished');
+        extinguishedCount++;
+
+        confetti({
+          particleCount: 20,
+          spread: 40,
+          origin: { y: 0.6 }
+        });
+
+        if (extinguishedCount === 3) {
+          setTimeout(() => {
+            document.getElementById('wishRevealed').classList.remove('hidden');
+            triggerCelebration();
+          }, 400);
+        }
+      }
+    }
+
+    function blowAllCandles() {
+      for (let i = 1; i <= 3; i++) {
+        blowCandle(i);
+      }
+    }
+
+    /* ========================================================
+       4. PHOTO UPLOAD HANDLER
+       ======================================================== */
+    function uploadImage(event, targetId) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById(targetId).src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    /* ========================================================
+       5. WEB AUDIO SYNTHESIZER (HAPPY BIRTHDAY MELODY)
+       ======================================================== */
+    let audioCtx = null;
+    let isPlayingAudio = false;
+    let musicTimeout = null;
+
+    const notes = {
+      'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
+      'G4': 392.00, 'A4': 440.00, 'B4': 493.88, 'C5': 523.25
+    };
+
+    const birthdaySong = [
+      { note: 'C4', duration: 0.3 }, { note: 'C4', duration: 0.2 },
+      { note: 'D4', duration: 0.5 }, { note: 'C4', duration: 0.5 },
+      { note: 'F4', duration: 0.5 }, { note: 'E4', duration: 0.8 },
+      
+      { note: 'C4', duration: 0.3 }, { note: 'C4', duration: 0.2 },
+      { note: 'D4', duration: 0.5 }, { note: 'C4', duration: 0.5 },
+      { note: 'G4', duration: 0.5 }, { note: 'F4', duration: 0.8 },
+      
+      { note: 'C4', duration: 0.3 }, { note: 'C4', duration: 0.2 },
+      { note: 'C5', duration: 0.5 }, { note: 'A4', duration: 0.5 },
+      { note: 'F4', duration: 0.5 }, { note: 'E4', duration: 0.5 },
+      { note: 'D4', duration: 0.8 },
+      
+      { note: 'B4', duration: 0.3 }, { note: 'B4', duration: 0.2 },
+      { note: 'A4', duration: 0.5 }, { note: 'F4', duration: 0.5 },
+      { note: 'G4', duration: 0.5 }, { note: 'F4', duration: 0.9 }
+    ];
+
+    function playNote(freq, duration) {
+      if (!audioCtx) return;
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function playMelodyLoop(index = 0) {
+      if (!isPlayingAudio) return;
+
+      if (index >= birthdaySong.length) {
+        musicTimeout = setTimeout(() => playMelodyLoop(0), 1000);
+        return;
+      }
+
+      const item = birthdaySong[index];
+      if (notes[item.note]) {
+        playNote(notes[item.note], item.duration);
+      }
+
+      musicTimeout = setTimeout(() => {
+        playMelodyLoop(index + 1);
+      }, item.duration * 1000 + 80);
+    }
+
+    function toggleAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      const btnText = document.getElementById('musicText');
+      const btnIcon = document.getElementById('musicIcon');
+
+      if (isPlayingAudio) {
+        isPlayingAudio = false;
+        clearTimeout(musicTimeout);
+        btnText.innerText = "Play Music";
+        btnIcon.className = "fa-solid fa-music text-pink-400";
+      } else {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        isPlayingAudio = true;
+        btnText.innerText = "Pause Music";
+        btnIcon.className = "fa-solid fa-pause text-roseGold animate-pulse";
+        playMelodyLoop(0);
+      }
+    }
+
+    /* ========================================================
+       6. ENTRANCE SCREEN & CELEBRATION EFFECTS
+       ======================================================== */
+    function openBirthdaySurprise() {
+      const entrance = document.getElementById('entranceScreen');
+      const main = document.getElementById('mainContent');
+
+      entrance.style.opacity = '0';
+      setTimeout(() => {
+        entrance.classList.add('hidden');
+        main.classList.remove('hidden');
+        startTypewriter();
+        triggerCelebration();
+        toggleAudio();
+      }, 800);
+    }
+
+    function triggerCelebration() {
+      const count = 180;
+      const defaults = { origin: { y: 0.7 } };
+
+      function fire(particleRatio, opts) {
+        confetti(Object.assign({}, defaults, opts, {
+          particleCount: Math.floor(count * particleRatio)
+        }));
+      }
+
+      fire(0.25, { spread: 26, startVelocity: 55, colors: ['#B76E79', '#FFD1DC'] });
+      fire(0.2, { spread: 60, colors: ['#FFD700', '#FFFFFF'] });
+      fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+      fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, colors: ['#E6E6FA', '#FF1493'] });
+    }
+
+    /* ========================================================
+       7. LIVE COUNTDOWN TIMER TARGETING OCT 28
+       ======================================================== */
+    function updateCountdown() {
+      const now = new Date();
+      let year = now.getFullYear();
+      let target = new Date(`October 28, ${year} 00:00:00`).getTime();
+
+      // If Oct 28 has already passed this year, set target to next year
+      if (now.getTime() > new Date(`October 28, ${year} 23:59:59`).getTime()) {
+        target = new Date(`October 28, ${year + 1} 00:00:00`).getTime();
+      }
+
+      const diff = target - now.getTime();
+
+      if (diff <= 0) {
+        document.getElementById('cDays').innerText = "00";
+        document.getElementById('cHours').innerText = "00";
+        document.getElementById('cMins').innerText = "00";
+        document.getElementById('cSecs').innerText = "00";
+        return;
+      }
+
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((diff / (1000 * 60)) % 60);
+      const s = Math.floor((diff / (1000)) % 60);
+
+      document.getElementById('cDays').innerText = String(d).padStart(2, '0');
+      document.getElementById('cHours').innerText = String(h).padStart(2, '0');
+      document.getElementById('cMins').innerText = String(m).padStart(2, '0');
+      document.getElementById('cSecs').innerText = String(s).padStart(2, '0');
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+  </script>
+</body>
+</html>
